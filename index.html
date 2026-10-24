@@ -1,17 +1,18 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
-
-<title>Personal & Work Planner</title>
+<title>Planner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d110b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Planner">
+<meta name="apple-mobile-web-app-title" content="Team Planner">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="backend.js"></script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="local-db.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600;700&display=swap">
 <style>
 /* Look: mint page, one black hero card holding the date and capture bar, lime as the single action colour, tasks as soft white cards, areas as round pills. */
@@ -185,7 +186,7 @@ button { cursor: pointer; }
 .rv h2 { font-family: var(--font-display); font-size: 18px; margin: 0 0 2px; }
 .rv .hint { color: var(--muted); font-size: 13.5px; margin: 0 0 12px; }
 .rv label.t { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 12px 0 5px; }
-.rv input[type="text"], .rv input[type="date"], .rv input[type="time"], .rv input[type="number"] { color: var(--ink); width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 12px; padding: 10px 12px; font-size: 15.5px; }
+.rv input[type="text"], .rv input[type="date"], .rv input[type="time"] { width: 100%; border: 1px solid var(--line); background: var(--bg); border-radius: 12px; padding: 10px 12px; font-size: 15.5px; }
 .rv .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .rv .chips button { border: 1.5px solid var(--ink); background: transparent; border-radius: 999px; padding: 5px 13px; font-size: 13.5px; }
 .rv .chips button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
@@ -379,14 +380,12 @@ body.fopen::before { content: ""; position: fixed; inset: 0; background: rgba(0,
 .dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: linear-gradient(to top, var(--bg) 62%, rgba(0,0,0,0)); pointer-events: none; }
 .dock > * { pointer-events: auto; }
 .dock > .in { padding-top: 14px; padding-bottom: 8px; }
-.dock .capture { grid-template-columns: minmax(0, 1fr) auto; align-items: center; background: var(--band); color: var(--band-ink); border-radius: 999px; padding: 5px 5px 5px 18px; box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
+.dock .capture { grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; background: var(--band); color: var(--band-ink); border-radius: 999px; padding: 5px 5px 5px 18px; box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
 .dock .capin { grid-column: auto; }
 .dock .capture .capin input[type="text"] { font-size: 16px; padding-top: 12px; padding-bottom: 12px; }
 .dock .capin button { width: 30px; height: 30px; }
 .dock .capin #cap-clear { right: 38px; }
-.dock .fx-dock { flex: none; width: 56px; height: 56px; border-radius: 999px; border: 0; background: var(--band); color: var(--band-ink); font-size: 26px; line-height: 1; cursor: pointer; box-shadow: 0 8px 28px rgba(0,0,0,0.28); }
-.dock .caprow { display: flex; align-items: center; gap: 8px; }
-.dock .caprow .capture { flex: 1; min-width: 0; }
+.dock .fx-dock { width: 46px; height: 46px; border-radius: 999px; border: 1.5px solid currentColor; background: transparent; color: inherit; font-size: 24px; line-height: 1; cursor: pointer; }
 body[data-view="goals"] .dock .fx-dock { display: none; }
 .dock .add { min-height: 46px; padding: 0 22px; }
 .dock .capture:focus-within { box-shadow: 0 8px 28px rgba(0,0,0,0.28), 0 0 0 2px var(--gold); }
@@ -414,18 +413,6 @@ body.sheet::before { content: ""; position: fixed; inset: 0; background: rgba(0,
   .hero h1 { font-size: 24px; }
 }
 @media (min-width: 761px) { .dock .in { max-width: 560px; } }
-/* tighter vertical rhythm: less dead space between tabs, goals strip and task lists */
-#goals:empty { display: none; }
-#goals { margin: 4px 0 2px; }
-.g-strip2 { margin: 0; }
-#lists { margin-top: 4px; gap: 12px; }
-.group > h2 { margin: 0 4px 6px; }
-.list { padding: 0 16px; }
-.row { padding: 11px 0; }
-.stick { padding-bottom: 4px; }
-.focusbar { padding-top: 6px; }
-.frow + .frow { margin-top: 6px; }
-.meta { margin-top: 2px; }
 /* Design pass, from Apple HIG and Airbnb: 44pt targets, press feedback, translucent chrome, soft depth, clear focus, gentle motion */
 html { -webkit-text-size-adjust: 100%; -webkit-font-smoothing: antialiased; }
 .tabs button, .fch button, .fgrp button, .quick button, .afc, .afx, .pp-btn, .pp-row, #review .chips button, .rv .chips button, .morebtn, .fback, .fclr, .fx-dock { min-height: 44px; }
@@ -449,22 +436,6 @@ body::before { background: color-mix(in srgb, var(--bg) 80%, transparent); -webk
 body.fopen::before, body.sheet::before { height: auto; animation: fadeIn .25s ease; -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
 .toast { animation: sheetUp .25s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } button:active:not(:disabled) { transform: none; } }
-.kindrow { margin: 4px 0 10px; }
-.kindrow button { flex: 1; }
-.rv .row2 { display: flex; gap: 8px; } .rv .row2 > div { flex: 1; min-width: 0; }
-.rv .row2 input { width: 100%; box-sizing: border-box; }
-/* search mode: the search field replaces the header, no layout jump */
-.searchbar { display: none; align-items: center; gap: 8px; margin: 6px 0 0; }
-body.sopen .searchbar, body.searching .searchbar { display: flex; }
-.searchbar .qwrap { position: relative; flex: 1; min-width: 0; }
-.searchbar input:focus { outline: none; box-shadow: 0 0 0 2px var(--ink); }
-.searchbar .qwrap button { right: 6px; }
-.searchbar .qcancel { position: static; transform: none; width: auto; height: 44px; padding: 0 6px; border-radius: 12px; background: transparent; color: var(--ink); font-size: 15.5px; font-weight: 600; }
-.scount { margin: 10px 4px 2px; font-size: 13.5px; color: var(--muted); }
-.scount b { color: var(--ink); }
-body.sopen .top, body.searching .top { display: none; }
-body.sopen .stick, body.searching .stick { display: none; }
-body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
 .g-week { height: 50px; }
 .g-week button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; height: 100%; border: 0; background: transparent; padding: 0; font-size: 10px; color: var(--muted); min-height: 44px; border-radius: 8px; }
 .g-week button i { display: block; width: 100%; max-width: 22px; background: var(--accent-soft); border-radius: 4px; min-height: 3px; }
@@ -507,19 +478,18 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
 <div id="review" class="in" hidden></div>
 <div id="nudge" class="in" hidden></div>
 <main class="page in">
-  <div class="searchbar"><div class="qwrap"><input type="search" id="q" placeholder="Search all tasks" aria-label="Search tasks" autocomplete="off" enterkeyhint="search"><button type="button" id="q-clear" aria-label="Clear search" hidden>&times;</button></div><button type="button" id="q-cancel" class="qcancel">Cancel</button></div>
-  <p class="scount" id="scount" hidden></p>
+  <div class="searchbar"><input type="search" id="q" placeholder="Search all tasks" aria-label="Search tasks" autocomplete="off"><button type="button" id="q-clear" aria-label="Clear search" hidden>&times;</button></div>
   <div class="stick"><nav class="tabs" id="tabs" aria-label="Areas"></nav>
   <div class="focusbar" id="foci"></div></div>
   <div id="goals"></div>
   <div id="lists"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
 </main>
 <div class="dock" id="dock">
-  <div class="in caprow"><form class="capture" id="capture" autocomplete="off">
+  <div class="in"><form class="capture" id="capture" autocomplete="off">
       <span class="capin"><input type="text" id="cap-title" placeholder="Add a task or thought" aria-label="New entry" enterkeyhint="send"><button type="button" id="cap-clear" aria-label="Clear" hidden>&times;</button><button type="button" id="cap-mic" aria-label="Speak your task" hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button></span>
+      <button type="button" class="fx-dock" id="fclear-dock" aria-label="Clear all filters" hidden>&times;</button>
       <button class="add" type="submit">Add</button>
-    </form>
-    <button type="button" class="fx-dock" id="fclear-dock" aria-label="Clear all filters" hidden>&times;</button></div>
+    </form></div>
   <nav class="nav" id="nav" aria-label="Views"><div class="in navin">
     <button type="button" data-view="tasks" aria-pressed="true"><span class="ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg></span>Tasks</button>
     <button type="button" data-view="goals" aria-pressed="false"><span class="ic"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8"/></svg></span>Goals</button>
@@ -532,7 +502,7 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
 <script>
 (function () {
   var AREAS = [
-    { id: "personal", name: "Personal Life" },
+    { id: "personal", name: "Personal (private)" },
     { id: "tranquebar", name: "Tranquebar Home" },
     { id: "okkal", name: "Okkal" }
   ];
@@ -701,6 +671,7 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
     var meta = [];
     if (filter.area === "all") meta.push("<span>" + esc(areaName(t.area || "tranquebar")) + "</span>");
     if (t.focus) meta.push('<span class="focus">' + esc(t.focus) + (t.alsoFocus ? ' + ' + esc(t.alsoFocus) : "") + "</span>");
+    if (t.area !== "personal" && t.owner && t.owner !== myId) meta.push('<span class="focus">By ' + esc(ownerNames[t.owner] || "a teammate") + "</span>");
     if (t.subtasks && t.subtasks.length) { var dn = t.subtasks.filter(function (x) { return x.done; }).length; meta.push('<span class="prog">' + dn + "/" + t.subtasks.length + " steps</span>"); }
     var bk = blockerOf(t); if (bk && !t.done) { var bt = String(bk.title); if (bt.length > 46) bt = bt.slice(0, 44) + "\u2026"; meta.unshift('<span class="blk">Waiting on: ' + esc(bt) + "</span>"); }
     if (t.people && splitNames(t.people).length) meta.push("<span>" + (t.delegated ? "Waiting on " : "With ") + esc(splitNames(t.people).join(", ")) + "</span>");
@@ -724,7 +695,7 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
     $("today").textContent = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
     if (state === "nodb") {
       $("tabs").innerHTML = ""; $("foci").innerHTML = ""; $("sum").textContent = "";
-      $("lists").innerHTML = '<div class="empty"><b>Storage is not available here</b>Open this planner while signed in to claude.ai to see and add tasks.</div>';
+      $("lists").innerHTML = '<div class="empty"><b>Storage is not available here</b>Sign in to see and add tasks.</div>';
       return;
     }
     if (state === "loading") return;
@@ -753,7 +724,6 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
     if (searching) parts = ["<b>" + vis.length + "</b> match" + (vis.length === 1 ? "" : "es") + " for \u201c" + esc(query.trim()) + "\u201d"];
     if (!searching) parts.push(wait.length + " waiting");
     $("sum").innerHTML = parts.join(" · ");
-    var sc = $("scount"); if (sc) { sc.hidden = !searching; sc.innerHTML = searching ? parts[0] : ""; }
 
     var html = group("Follow up now", attn, "attn") + group("Mine to do", mine) + group("Waiting on others", wait);
     if (searching && !vis.length) html += '<div class="empty"><b>No matches</b>Nothing has \u201c' + esc(query.trim()) + '\u201d in a title, note, step, person or channel.</div>';
@@ -983,13 +953,7 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
   function renderReview() {
     var box = $("review");
     if (!review) { box.hidden = true; box.innerHTML = ""; return; }
-    var kindRow = '<div class="kindrow chips" role="group" aria-label="Type">' + chip("kind", "task", "Task", review.kind !== "goal") + chip("kind", "goal", "Daily goal", review.kind === "goal") + "</div>";
-    if (review.kind === "goal") {
-      var g0 = review.g;
-      box.innerHTML = '<div class="rv"><h2>File this</h2>' + kindRow + '<p class="hint">A goal repeats every day and resets each morning. Tick it off or count it.</p><label class="t" for="rv-gt">Goal</label><input type="text" id="rv-gt" value="' + esc(g0.title) + '"><div class="row2"><div><label class="t" for="rv-gg">Daily target</label><input type="number" step="any" min="0" id="rv-gg" value="' + esc(g0.target) + '"></div><div><label class="t" for="rv-gu">Unit</label><input type="text" id="rv-gu" value="' + esc(g0.unit) + '" placeholder="done, times, L"></div></div><div class="act"><button type="button" class="save" data-rv="gsave">Save goal</button><button type="button" class="cancel" data-rv="cancel">Cancel</button></div></div>';
-      box.hidden = false; return;
-    }
-    var d = review.draft, h = '<div class="rv"><h2>File this</h2>' + kindRow + '<p class="hint">' + (review.busy ? '<span class="busy">Reading your note and suggesting where it goes…</span>' : "Check the wording and answer what’s unclear, then save.") + "</p>";
+    var d = review.draft, h = '<div class="rv"><h2>File this task</h2><p class="hint">' + (review.busy ? '<span class="busy">Reading your note and suggesting where it goes…</span>' : "Check the wording and answer what’s unclear, then save.") + "</p>";
     if (review.parts && review.parts.length > 1) h += '<div class="q"><span>This sounds like <b>' + review.parts.length + ' separate tasks</b>:</span><ol class="split">' + review.parts.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + '</ol><span class="chips">' + chip("split", "1", "Split into " + review.parts.length + " tasks", false) + chip("split", "0", "Keep as one", false) + "</span></div>";
     if (review.isPart) h += '<p class="hint" style="margin-top:0"><b>Next task</b>' + (review.queue.length ? " \u00b7 " + review.queue.length + " more after this" : " \u00b7 last one") + "</p>";
     h += '<label class="t" for="rv-title">Task, reworded</label><input type="text" id="rv-title" value="' + esc(d.title) + '">';
@@ -1038,7 +1002,6 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
   }
   function syncReview() {
     if (!review) return;
-    if (review.kind === "goal") { var gt = $("rv-gt"), gg = $("rv-gg"), gu = $("rv-gu"); if (gt) review.g.title = gt.value; if (gg) review.g.target = gg.value; if (gu) review.g.unit = gu.value; return; }
     var t = $("rv-title"), p = $("rv-people"), iv = $("rv-inv"), dt = $("rv-date"), tm = $("rv-time"); if (tm) review.draft.remindTime = tm.value;
     if (t) review.draft.title = t.value; if (p) review.draft.people = p.value; if (iv) review.draft.involved = iv.value; if (dt && dt.value !== review.draft.remindOn && document.activeElement === dt) review.draft.remindOn = dt.value;
   }
@@ -1119,17 +1082,7 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
     var el = e.target.closest("[data-rv]"); if (!el || !review) return;
     syncReview();
     var act = el.getAttribute("data-rv"), v = el.getAttribute("data-v"), d = review.draft;
-    if (act === "kind") {
-      if (v === "goal" && review.kind !== "goal") { review.g = review.g || { title: d.title, target: "1", unit: "done" }; review.kind = "goal"; }
-      else if (v === "task" && review.kind === "goal") { if (review.g.title.trim()) d.title = review.g.title; review.kind = ""; }
-    }
-    else if (act === "gsave") {
-      var gt2 = review.g.title.trim(), gg2 = parseFloat(review.g.target); if (!gt2 || !(gg2 > 0) || !db) { toast("Add a name and a daily target."); return; }
-      var gu2 = review.g.unit.trim() || "done", gdoc = { title: gt2, target: gg2, unit: gu2, steps: gu2.toLowerCase() === "l" ? [0.25, 0.5, 1] : [1], period: "daily", area: d.area, createdAt: Date.now() }, qN2 = review.queue || [];
-      review = null; db.collection("goals").add(gdoc).catch(fail); goals.push(Object.assign({ id: "tmp" + Date.now() }, gdoc));
-      toast("Daily goal added: " + gt2); render(); renderGoals(); nextInQueue(qN2);
-    }
-    else if (act === "area") { d.area = v; if (d.focus && !allFociIn(v).some(function (f) { return f.name === d.focus; })) d.focus = ""; }
+    if (act === "area") { d.area = v; if (d.focus && !allFociIn(v).some(function (f) { return f.name === d.focus; })) d.focus = ""; }
     else if (act === "more") { review.more = !review.more; }
     else if (act === "focus") { d.focus = v; }
     else if (act === "also") { var a2 = (d.alsoFocus || "").split(",").map(function (x) { return x.trim(); }).filter(Boolean), i2 = a2.indexOf(v); if (i2 >= 0) a2.splice(i2, 1); else a2.push(v); d.alsoFocus = a2.join(", "); }
@@ -1211,17 +1164,20 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
     });
   })();
   /* Filter panel: choices inside one group are alternatives (any of), different groups must all match. */
-  var adv = { status: [], due: [], people: [], focus: [], repeat: false };
-  function advCount() { return adv.status.length + adv.due.length + adv.people.length + adv.focus.length + (adv.repeat ? 1 : 0); }
+  var adv = { status: [], due: [], people: [], focus: [], repeat: false, mine: false };
+  function advCount() { return adv.status.length + adv.due.length + adv.people.length + adv.focus.length + (adv.repeat ? 1 : 0) + (adv.mine ? 1 : 0); }
   function tstatus(t) { if (t.done) return "done"; if (t.remindOn && t.remindOn <= todayIso() && !blockerOf(t)) return "now"; return isWaiting(t) ? "wait" : "todo"; }
   function dueKey(t) { var d = t.remindOn; if (!d) return "none"; var td = todayIso(); if (d < td) return "over"; if (d === td) return "today"; return d <= inDays(7) ? "week" : "later"; }
   function inFocus(name, f) { var g = 0; while (name && g++ < 10) { if (name === f) return true; name = parentOf(name); } return false; }
+  var myId = "", iAmOwner = false, ownerNames = {}, userCap = null;
+  function isMine(t) { return t.area === "personal" || (t.owner ? t.owner === myId : iAmOwner); }
   function matchesAdv(t) {
     if (adv.status.length && adv.status.indexOf(tstatus(t)) < 0) return false;
     if (adv.due.length && adv.due.indexOf(dueKey(t)) < 0) return false;
     if (adv.people.length) { var ns = splitNames(t.people).concat(splitNames(t.involved)).map(function (x) { return x.toLowerCase(); }); if (!adv.people.some(function (p) { return ns.indexOf(p.toLowerCase()) >= 0; })) return false; }
     if (adv.focus.length) { var fs = [t.focus || ""].concat(String(t.alsoFocus || "").split(",").map(function (s) { return s.trim(); })); if (!adv.focus.some(function (f) { return fs.some(function (x) { return x && inFocus(x, f); }); })) return false; }
     if (adv.repeat && !t.repeat) return false;
+    if (adv.mine && !isMine(t)) return false;
     return true;
   }
   function allPeople() { var c = {}; tasks.forEach(function (t) { splitNames(t.people).concat(splitNames(t.involved)).forEach(function (n) { var k = n.toLowerCase(); c[k] = c[k] || { n: n, c: 0 }; c[k].c++; }); }); return Object.keys(c).map(function (k) { return c[k]; }).sort(function (a, b) { return b.c - a.c || (a.n < b.n ? -1 : 1); }).map(function (x) { return x.n; }); }
@@ -1232,18 +1188,20 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
     var h = "";
     ["status", "due", "people", "focus"].forEach(function (k) { adv[k].forEach(function (v) { h += '<button type="button" class="afc" data-af="' + k + '" data-v="' + esc(v) + '" aria-label="Remove filter ' + esc(L[v] || v) + '">' + esc(L[v] || v) + " &times;</button>"; }); });
     if (adv.repeat) h += '<button type="button" class="afc" data-af="repeat" aria-label="Remove filter Repeating">Repeating &times;</button>';
+    if (adv.mine) h += '<button type="button" class="afc" data-af="mine" aria-label="Remove filter Only mine">Only mine &times;</button>';
     var fd = $("fclear-dock"); if (fd) fd.hidden = !n;
     var fo = $("foci"); if (fo && !document.body.classList.contains("searching")) fo.innerHTML = h ? '<div class="afs">' + h + "</div>" : "";
   }
   function fchips(key, items) {
     return '<div class="fch">' + items.map(function (it) { var on = adv[key].indexOf(it[0]) >= 0; return '<button type="button" data-f="' + key + '" data-v="' + esc(it[0]) + '" aria-pressed="' + on + '">' + esc(it[1]) + "</button>"; }).join("") + "</div>";
   }
-  $("fclear-dock").addEventListener("click", function () { adv = { status: [], due: [], people: [], focus: [], repeat: false }; render(); });
+  $("fclear-dock").addEventListener("click", function () { adv = { status: [], due: [], people: [], focus: [], repeat: false, mine: false }; render(); });
   $("foci").addEventListener("click", function (e) {
     var b = e.target.closest("[data-af]"); if (!b) return;
     var k = b.getAttribute("data-af"), v = b.getAttribute("data-v");
-    if (k === "all") adv = { status: [], due: [], people: [], focus: [], repeat: false };
+    if (k === "all") adv = { status: [], due: [], people: [], focus: [], repeat: false, mine: false };
     else if (k === "repeat") adv.repeat = false;
+    else if (k === "mine") adv.mine = false;
     else adv[k] = adv[k].filter(function (x) { return x !== v; });
     render();
   });
@@ -1272,7 +1230,7 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
       '<div class="fg"><span>Reminder date</span>' + fchips("due", [["over", "Overdue"], ["today", "Today"], ["week", "Next 7 days"], ["later", "Later"], ["none", "No date"]]) + "</div>" +
       (allPeople().length ? '<div class="fg"><span>People</span>' + fchips("people", allPeople().map(function (n) { return [n, n]; })) + "</div>" : "") +
       (fl ? '<div class="fg"><span>Channel</span><small class="fnote">Picking a parent includes everything under it</small>' + chan + "</div>" : "") +
-      '<div class="fg"><span>Other</span><div class="fch"><button type="button" data-f="repeat" aria-pressed="' + adv.repeat + '">Repeating tasks only</button></div></div>' +
+      '<div class="fg"><span>Other</span><div class="fch"><button type="button" data-f="mine" aria-pressed="' + adv.mine + '">Only my tasks</button><button type="button" data-f="repeat" aria-pressed="' + adv.repeat + '">Repeating tasks only</button></div></div>' +
       '<div class="fact"><button type="button" class="fdone" data-fx="close">Show ' + shown + " task" + (shown === 1 ? "" : "s") + '</button></div>';
     box.innerHTML = h;
   }
@@ -1281,10 +1239,11 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
   $("fbtn").addEventListener("click", openFilter);
   $("fsheet").addEventListener("click", function (e) {
     var x = e.target.closest("[data-fx]");
-    if (x) { if (x.getAttribute("data-fx") === "clear") { adv = { status: [], due: [], people: [], focus: [], repeat: false }; render(); renderFilter(); } else closeFilter(); return; }
+    if (x) { if (x.getAttribute("data-fx") === "clear") { adv = { status: [], due: [], people: [], focus: [], repeat: false, mine: false }; render(); renderFilter(); } else closeFilter(); return; }
     var el = e.target.closest("[data-f]"); if (!el) return;
     var key = el.getAttribute("data-f"), v = el.getAttribute("data-v");
     if (key === "repeat") adv.repeat = !adv.repeat;
+    else if (key === "mine") adv.mine = !adv.mine;
     else { var i = adv[key].indexOf(v); if (i >= 0) adv[key].splice(i, 1); else adv[key].push(v); }
     render(); renderFilter();
   });
@@ -1292,14 +1251,12 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("fsheet").hidden) closeFilter(); });
   var qi = $("q"), qc = $("q-clear");
   qi.addEventListener("input", function () { query = qi.value; qc.hidden = !query; render(); });
-  qi.addEventListener("keydown", function (e) { if (e.key === "Escape") { $("q-cancel").click(); } });
+  qi.addEventListener("keydown", function (e) { if (e.key === "Escape") { qi.value = ""; query = ""; qc.hidden = true; render(); } });
   qc.addEventListener("click", function () { qi.value = ""; query = ""; qc.hidden = true; render(); qi.focus(); });
 
   /* mobile app behaviours */
   (function () {
     var so = $("s-open"), qi2 = $("q");
-    function closeSearch() { document.body.classList.remove("sopen"); qi2.value = ""; query = ""; $("q-clear").hidden = true; render(); window.scrollTo(0, 0); }
-    $("q-cancel").addEventListener("click", closeSearch);
     so.addEventListener("click", function () {
       var openNow = document.body.classList.contains("sopen") || !!query.trim();
       if (openNow) { document.body.classList.remove("sopen"); qi2.value = ""; query = ""; $("q-clear").hidden = true; render(); }
@@ -1489,7 +1446,49 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
 
   render();
   Promise.resolve(window.claude && window.claude.use ? window.claude.use("db") : null).catch(function () { return null; }).then(function (d) {
-    db = d;
+    if (!d) { db = null; state = "nodb"; render(); return; }
+    Promise.resolve(window.claude.use("user")).catch(function () { return null; }).then(function (u) {
+      userCap = u; try { if (u) iAmOwner = !!u.isOwner(); } catch (e) {}
+      return u && u.id ? Promise.resolve(u.id()).then(function (i) { myId = i || ""; }).catch(function () {}) : null;
+    }).then(function () { db = makeDb(d); start(); });
+  });
+  function makeDb(raw) {
+    var P = "data/users/" + (myId || "me") + "/mine/";
+    function find(id) { return tasks.filter(function (x) { return x.id === id; })[0]; }
+    function tpath(personal) { return personal ? P + "tasks" : "tasks"; }
+    function strip(o) { var c = Object.assign({}, o); delete c.id; return c; }
+    return {
+      collection: function (n) {
+        if (n === "tasks") return {
+          add: function (doc) { var p = doc.area === "personal"; if (!p && !doc.owner) doc = Object.assign({ owner: myId }, doc); return raw.collection(tpath(p)).add(doc); },
+          onSnapshot: function (cb, err) {
+            var a = [], b = [], got = 0;
+            function fire() { cb({ docs: a.concat(b) }); }
+            raw.collection("tasks").onSnapshot(function (s) { a = s.docs; got |= 1; if (got === 3) fire(); }, err);
+            raw.collection(P + "tasks").onSnapshot(function (s) { b = s.docs; got |= 2; if (got === 3) fire(); }, function () { got |= 2; b = []; if (got === 3) fire(); });
+          }
+        };
+        if (n === "goals" || n === "goallogs") return raw.collection(P + n);
+        return raw.collection(n);
+      },
+      doc: function (path) {
+        var a = path.split("/"), kind = a[0], id = a[1];
+        if (kind === "goals" || kind === "goallogs") return raw.doc(P + kind + "/" + id);
+        if (kind !== "tasks") return raw.doc(path);
+        return {
+          update: function (patch) {
+            var t = find(id), cur = !!(t && t.area === "personal"), next = patch.area !== undefined ? patch.area === "personal" : cur;
+            if (cur === next) return raw.doc(tpath(cur) + "/" + id).update(patch);
+            var full = strip(Object.assign({}, t, patch)); if (!next && !full.owner) full.owner = myId;
+            return raw.doc(tpath(next) + "/" + id).set(full).then(function () { return raw.doc(tpath(cur) + "/" + id).delete(); });
+          },
+          set: function (doc) { return raw.doc(tpath(doc.area === "personal") + "/" + id).set(strip(doc)); },
+          delete: function () { var t = find(id); return raw.doc(tpath(!!(t && t.area === "personal")) + "/" + id).delete(); }
+        };
+      }
+    };
+  }
+  function start() {
     if (!db) { state = "nodb"; render(); return; }
     var got = 0;
     function ready() { got++; if (got >= 2 && state !== "ready") { state = "ready"; } render(); }
@@ -1503,7 +1502,17 @@ body.sopen .page, body.searching .page { padding-top: max(10px, 0px); }
       foci = s.docs.map(function (x) { return Object.assign({}, x.data() || {}, { id: x.id }); });
       if (state === "ready") schedule(); else ready();
     }, function () { ready(); });
-  });
+    nameOwners();
+  }
+  function nameOwners() {
+    if (!userCap || !userCap.profiles) return;
+    var seen = "";
+    setInterval(function () {
+      var ids = {}; tasks.forEach(function (t) { if (t.owner && t.owner !== myId && !ownerNames[t.owner]) ids[t.owner] = 1; });
+      var list = Object.keys(ids); var key = list.join(","); if (!list.length || key === seen) return; seen = key;
+      Promise.resolve(userCap.profiles(list)).then(function (ps) { list.forEach(function (i) { if (ps && ps[i] && ps[i].name) ownerNames[i] = ps[i].name; }); render(); }).catch(function () {});
+    }, 2500);
+  }
 })();
 </script>
 <script>if("serviceWorker"in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script>
